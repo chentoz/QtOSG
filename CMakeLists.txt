@@ -29,6 +29,7 @@ SET( SOURCES
   MainWindow.cpp
   OSGWidget.cpp
   PickHandler.cpp
+  DragHandler.cpp
   QtOSG.cpp
 )
 

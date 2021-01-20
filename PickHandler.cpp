@@ -1,12 +1,9 @@
 #include "PickHandler.h"
 
 #include <osg/io_utils>
-
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
-
 #include <osgViewer/Viewer>
-
 #include <iostream>
 
 PickHandler::PickHandler( double devicePixelRatio )
