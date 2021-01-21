@@ -131,16 +131,19 @@ OSGWidget::OSGWidget( QWidget* parent,
   root->addChild(translateMT);
 
   // transform
-  float aspectRatio = static_cast<float>( this->width() / 2 ) / static_cast<float>( this->height() );
+  //float aspectRatio = static_cast<float>( this->width() / 2 ) / static_cast<float>( this->height() );
+  float aspectRatio = static_cast<float>( this->width() ) / static_cast<float>( this->height() );
   auto pixelRatio   = this->devicePixelRatio();
 
   // camera
   osg::Camera* mainCamera = new osg::Camera;
-  mainCamera->setViewport( 0, 0, this->width() / 2 * pixelRatio, this->height() * pixelRatio );
+  //mainCamera->setViewport( 0, 0, this->width() / 2 * pixelRatio, this->height() * pixelRatio );
+  mainCamera->setViewport( 0, 0, this->width() * pixelRatio, this->height() * pixelRatio );
   mainCamera->setClearColor( osg::Vec4( 0.f, 0.f, 1.f, 1.f ) );
   mainCamera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 1.f, 1000.f );
   mainCamera->setGraphicsContext( graphicsWindow_ );
 
+  // view
   osgViewer::View* mainView = new osgViewer::View;
   mainView->setCamera( mainCamera );
   mainView->setSceneData(root.get());
@@ -150,19 +153,19 @@ OSGWidget::OSGWidget( QWidget* parent,
       // set up the camera manipulators.
       osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 
-      keyswitchManipulator->addMatrixManipulator('1', "Trackball", new osgGA::TrackballManipulator());
-      keyswitchManipulator->addMatrixManipulator('2', "Flight", new osgGA::FlightManipulator());
-      keyswitchManipulator->addMatrixManipulator('3', "Drive", new osgGA::DriveManipulator());
-      keyswitchManipulator->addMatrixManipulator('4', "Terrain", new osgGA::TerrainManipulator());
+//      keyswitchManipulator->addMatrixManipulator('1', "Trackball", new osgGA::TrackballManipulator());
+//      keyswitchManipulator->addMatrixManipulator('2', "Flight", new osgGA::FlightManipulator());
+//      keyswitchManipulator->addMatrixManipulator('3', "Drive", new osgGA::DriveManipulator());
+//      keyswitchManipulator->addMatrixManipulator('4', "Terrain", new osgGA::TerrainManipulator());
       keyswitchManipulator->addMatrixManipulator('5', "Orbit", new osgGA::OrbitManipulator());
-      keyswitchManipulator->addMatrixManipulator('6', "FirstPerson", new osgGA::FirstPersonManipulator());
-      keyswitchManipulator->addMatrixManipulator('7', "Spherical", new osgGA::SphericalManipulator());
+//      keyswitchManipulator->addMatrixManipulator('6', "FirstPerson", new osgGA::FirstPersonManipulator());
+//      keyswitchManipulator->addMatrixManipulator('7', "Spherical", new osgGA::SphericalManipulator());
 
       std::string pathfile;
       mainView->setCameraManipulator(keyswitchManipulator.get());
 
       // add the state manipulator
-      mainView->addEventHandler(new osgGA::StateSetManipulator(mainView->getCamera()->getOrCreateStateSet()));
+      //mainView->addEventHandler(new osgGA::StateSetManipulator(mainView->getCamera()->getOrCreateStateSet()));
 
       // add the thread model handler
       mainView->addEventHandler(new osgViewer::ThreadingHandler);
@@ -182,76 +185,17 @@ OSGWidget::OSGWidget( QWidget* parent,
       // add the screen capture handler
       mainView->addEventHandler(new osgViewer::ScreenCaptureHandler);
 
-      osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
-      manipulator->setAllowThrow( false );
-      mainView->setCameraManipulator( manipulator );
+//      manipulator->setAllowThrow( false );
   }
   catch (...) {
       std::cout << "Failed to init cameras" << std::endl;
   }
 
 #ifdef WITH_PICK_HANDLER
-  mainView->addEventHandler( new PickHandler( this->devicePixelRatio() ) );
+  // mainView->addEventHandler( new PickHandler() );
 #endif
-  mainView->addEventHandler(new MouseDragHandler(this->devicePixelRatio()));
 
   viewer_->addView( mainView );
-
-  ////// side camera
-  osg::Camera* sideCamera = new osg::Camera;
-  sideCamera->setViewport( this->width() /2 * pixelRatio, 0,
-                           this->width() /2 * pixelRatio, this->height() * pixelRatio );
-
-  sideCamera->setClearColor( osg::Vec4( 0.f, 0.f, 1.f, 1.f ) );
-  sideCamera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 1.f, 1000.f );
-  sideCamera->setGraphicsContext( graphicsWindow_ );
-
-  osgViewer::View* sideView = new osgViewer::View;
-  sideView->setCamera( sideCamera );
-  sideView->setSceneData(root.get());
-
-  try
-  {
-      // set up the camera manipulators.
-      osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
-
-      keyswitchManipulator->addMatrixManipulator('1', "Trackball", new osgGA::TrackballManipulator());
-      keyswitchManipulator->addMatrixManipulator('2', "Flight", new osgGA::FlightManipulator());
-      keyswitchManipulator->addMatrixManipulator('3', "Drive", new osgGA::DriveManipulator());
-      keyswitchManipulator->addMatrixManipulator('4', "Terrain", new osgGA::TerrainManipulator());
-      keyswitchManipulator->addMatrixManipulator('5', "Orbit", new osgGA::OrbitManipulator());
-      keyswitchManipulator->addMatrixManipulator('6', "FirstPerson", new osgGA::FirstPersonManipulator());
-      keyswitchManipulator->addMatrixManipulator('7', "Spherical", new osgGA::SphericalManipulator());
-
-      std::string pathfile;
-      sideView->setCameraManipulator(keyswitchManipulator.get());
-
-      // add the state manipulator
-      sideView->addEventHandler(new osgGA::StateSetManipulator(sideView->getCamera()->getOrCreateStateSet()));
-
-      // add the thread model handler
-      sideView->addEventHandler(new osgViewer::ThreadingHandler);
-
-      // add the window size toggle handler
-      sideView->addEventHandler(new osgViewer::WindowSizeHandler);
-
-      // add the stats handler
-      sideView->addEventHandler(new osgViewer::StatsHandler);
-
-      // add the record camera path handler
-      sideView->addEventHandler(new osgViewer::RecordCameraPathHandler);
-
-      // add the LOD Scale handler
-      sideView->addEventHandler(new osgViewer::LODScaleHandler);
-
-      // add the screen capture handler
-      sideView->addEventHandler(new osgViewer::ScreenCaptureHandler);
-  }
-  catch (...) {
-      std::cout << "Failed to init cameras" << std::endl;
-  }
-  viewer_->addView( sideView );
-
   viewer_->setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
   viewer_->realize();
 
@@ -518,12 +462,13 @@ void OSGWidget::onResize( int width, int height )
   std::vector<osg::Camera*> cameras;
   viewer_->getCameras( cameras );
 
-  assert( cameras.size() == 2 );
+//  assert( cameras.size() == 2 );
 
   auto pixelRatio = this->devicePixelRatio();
 
-  cameras[0]->setViewport( 0, 0, width / 2 * pixelRatio, height * pixelRatio );
-  cameras[1]->setViewport( width / 2 * pixelRatio, 0, width / 2 * pixelRatio, height * pixelRatio );
+  //cameras[0]->setViewport( 0, 0, width / 2 * pixelRatio, height * pixelRatio );
+  cameras[0]->setViewport( 0, 0, width * pixelRatio, height * pixelRatio );
+  //cameras[1]->setViewport( width / 2 * pixelRatio, 0, width / 2 * pixelRatio, height * pixelRatio );
 }
 
 osgGA::EventQueue* OSGWidget::getEventQueue() const
